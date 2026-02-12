@@ -4,7 +4,16 @@ Read CO2, temperature, humidity, pressure, VOC, and NOx from a [Networked Artifa
 
 The [AirLab](https://www.crowdsupply.com/networked-artifacts/air-lab) is a portable, open-source air quality monitor built by [Networked Artifacts](https://networkedartifacts.com) (shoutout to Joel and the team). It measures CO2, temperature, humidity, atmospheric pressure, VOCs, and NOx using Sensirion sensors (SCD41 + SGP41), and publishes data over WiFi via MQTT. Check out their [Crowd Supply page](https://www.crowdsupply.com/networked-artifacts/air-lab) to get one.
 
-Designed to run on a Raspberry Pi via crontab, alongside [aranet4-dash](https://github.com/12ian34/aranet4-dash). Same pattern: `uv`, `.env`, cron `--single` mode, SQLite, Grafana.
+Designed to run on a Raspberry Pi via crontab, alongside [aranet4-dash](https://github.com/12ian34/aranet4-dash). Same pattern.
+
+## Tech stack
+
+- Python 3.9+ managed with [uv](https://docs.astral.sh/uv/)
+- [paho-mqtt](https://pypi.org/project/paho-mqtt/) (MQTT client) + [python-dotenv](https://pypi.org/project/python-dotenv/) (config)
+- SQLite via stdlib `sqlite3`
+- [Mosquitto](https://mosquitto.org/) MQTT broker on the Pi
+- [Grafana](https://grafana.com/) + [frser-sqlite-datasource](https://github.com/fr-ser/grafana-sqlite-datasource) plugin
+- crontab for scheduling (every minute, `--single` mode)
 
 ## Prerequisites
 
