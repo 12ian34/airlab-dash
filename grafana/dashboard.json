@@ -1,4 +1,13 @@
 {
+  "__inputs": [
+    {
+      "name": "DS_SQLITE",
+      "label": "SQLite",
+      "description": "SQLite datasource pointing to airlab.db",
+      "type": "datasource",
+      "pluginId": "frser-sqlite-datasource"
+    }
+  ],
   "annotations": {
     "list": [
       {
