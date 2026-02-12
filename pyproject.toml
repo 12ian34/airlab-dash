@@ -1,0 +1,9 @@
+[project]
+name = "airlab-dash"
+version = "0.1.0"
+description = "AirLab MQTT data logger with SQLite storage"
+requires-python = ">=3.9"
+dependencies = [
+    "paho-mqtt>=2.0",
+    "python-dotenv>=1.0.0",
+]

@@ -1,0 +1,8 @@
+.env
+*.db
+*.db-journal
+*.db-wal
+.venv/
+__pycache__/
+*.pyc
+cron.log
