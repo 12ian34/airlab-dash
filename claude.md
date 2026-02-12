@@ -60,7 +60,7 @@ Table `airlab_readings` in SQLite:
 - Configured via [Air Lab Studio](https://airlab.networkedartifacts.com) (Bluetooth, Chrome-based browser — Chrome/Edge/Brave only, not Firefox/Safari)
 - Setup flow: plug in USB-C → press A → set time → outdoor calibration → WiFi config → MQTT config
 - **WiFi: 2.4GHz only** — will not connect to 5GHz networks. Common gotcha if router broadcasts both bands under one SSID.
-- MQTT topic structure TBD — use `discover.py` to inspect
+- MQTT publishes one value per topic with short names: `{base_topic}/co2` (ppm), `{base_topic}/tmp` (°C), `{base_topic}/hum` (%), `{base_topic}/prs` (hPa), `{base_topic}/voc` (index), `{base_topic}/nox` (index). All values are plain numbers (not JSON).
 - Supports Home Assistant auto-discovery (homeassistant/sensor/…/config topics)
 
 ## Gotchas discovered during setup

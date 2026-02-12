@@ -13,24 +13,15 @@ from pathlib import Path
 import paho.mqtt.client as mqtt
 from dotenv import load_dotenv
 
-# Sensor fields we expect from the AirLab, with aliases for flexibility
+# AirLab MQTT topic suffixes → DB column names
+# Topics: airlab/co2, airlab/tmp, airlab/hum, airlab/prs, airlab/voc, airlab/nox
 FIELD_ALIASES: dict[str, str] = {
     "co2": "co2_ppm",
-    "carbon_dioxide": "co2_ppm",
-    "co2_ppm": "co2_ppm",
-    "temperature": "temperature_c",
-    "temp": "temperature_c",
-    "temperature_c": "temperature_c",
-    "humidity": "humidity_percent",
-    "rh": "humidity_percent",
-    "relative_humidity": "humidity_percent",
-    "humidity_percent": "humidity_percent",
-    "pressure": "pressure_hpa",
-    "pressure_hpa": "pressure_hpa",
+    "tmp": "temperature_c",
+    "hum": "humidity_percent",
+    "prs": "pressure_hpa",
     "voc": "voc_index",
-    "voc_index": "voc_index",
     "nox": "nox_index",
-    "nox_index": "nox_index",
 }
 
 VALID_RANGES = {
