@@ -1,5 +1,9 @@
 # AirLab MQTT Data Logger
 
+<p align="center">
+  <img src="https://cdn.networkedartifacts.com/al1__render-front.png" alt="AirLab" width="400" />
+</p>
+
 Read CO2, temperature, humidity, pressure, VOC, and NOx from a [Networked Artifacts AirLab](https://networkedartifacts.com/airlab) via MQTT and log to a local SQLite database. Visualise with Grafana.
 
 The [AirLab](https://www.crowdsupply.com/networked-artifacts/air-lab) is a portable, open-source air quality monitor built by [Networked Artifacts](https://networkedartifacts.com) (shoutout to Joël and the team). It measures CO2, temperature, humidity, atmospheric pressure, VOCs, and NOx using Sensirion sensors (SCD41 + SGP41) and an LPS22 pressure sensor, and publishes data over WiFi via MQTT. Check out their [Crowd Supply page](https://www.crowdsupply.com/networked-artifacts/air-lab) to get one, and the [device manual](https://networkedartifacts.com/manuals/airlab/device-overview) for full details.
