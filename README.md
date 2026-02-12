@@ -2,7 +2,9 @@
 
 Read CO2, temperature, humidity, pressure, VOC, and NOx from a [Networked Artifacts AirLab](https://networkedartifacts.com/airlab) via MQTT and log to a local SQLite database. Visualise with Grafana.
 
-The [AirLab](https://www.crowdsupply.com/networked-artifacts/air-lab) is a portable, open-source air quality monitor built by [Networked Artifacts](https://networkedartifacts.com) (shoutout to Joel and the team). It measures CO2, temperature, humidity, atmospheric pressure, VOCs, and NOx using Sensirion sensors (SCD41 + SGP41), and publishes data over WiFi via MQTT. Check out their [Crowd Supply page](https://www.crowdsupply.com/networked-artifacts/air-lab) to get one.
+The [AirLab](https://www.crowdsupply.com/networked-artifacts/air-lab) is a portable, open-source air quality monitor built by [Networked Artifacts](https://networkedartifacts.com) (shoutout to Joël and the team). It measures CO2, temperature, humidity, atmospheric pressure, VOCs, and NOx using Sensirion sensors (SCD41 + SGP41) and an LPS22 pressure sensor, and publishes data over WiFi via MQTT. Check out their [Crowd Supply page](https://www.crowdsupply.com/networked-artifacts/air-lab) to get one, and the [device manual](https://networkedartifacts.com/manuals/airlab/device-overview) for full details.
+
+> **Note:** The SGP41 VOC/NOx sensor needs ~1 hour to warm up before readings are reliable. The VOC and NOx Index algorithms also need ~24 hours of continuous operation to learn a baseline — early readings are relative to limited history, so don't worry if they look odd at first.
 
 Designed to run on a Raspberry Pi via crontab, alongside [aranet4-dash](https://github.com/12ian34/aranet4-dash). Same pattern.
 
@@ -23,6 +25,7 @@ Designed to run on a Raspberry Pi via crontab, alongside [aranet4-dash](https://
 - [uv](https://docs.astral.sh/uv/) (`curl -LsSf https://astral.sh/uv/install.sh | sh`)
 - [Grafana](https://grafana.com/docs/grafana/latest/setup-grafana/installation/debian/) + [SQLite datasource plugin](https://github.com/fr-ser/grafana-sqlite-datasource)
 - An AirLab on the same WiFi network as the Pi (**must be 2.4GHz** — the AirLab does not support 5GHz WiFi)
+- The AirLab **must be plugged into USB-C power** for continuous MQTT — on battery it sleeps and stops publishing regardless of MQTT connection state (confirmed by the AirLab team)
 
 ## 1. Install Mosquitto
 
@@ -244,6 +247,10 @@ CREATE INDEX IF NOT EXISTS idx_airlab_timestamp ON airlab_readings(timestamp);
 ```
 
 ## Troubleshooting
+
+### AirLab stops publishing after a minute
+
+The AirLab **must be plugged into USB-C power** to continuously publish via MQTT. On battery, it goes to sleep and stops WiFi/MQTT regardless of connection state. Only BLE connections keep it awake on battery (confirmed by the AirLab team). Plug it in and it will publish at the record sample rate (default 5 seconds).
 
 ### AirLab won't connect to WiFi
 

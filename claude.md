@@ -55,8 +55,10 @@ Table `airlab_readings` in SQLite:
 - `DB_PATH` — path to SQLite database (default `/var/lib/airlab-dash/airlab.db`)
 
 ## AirLab device details
-- Built by [Networked Artifacts](https://networkedartifacts.com) ([Crowd Supply page](https://www.crowdsupply.com/networked-artifacts/air-lab))
-- Sensors: SCD41 (CO2, temp, humidity), SGP41 (VOC, NOx), BMP (pressure)
+- Built by [Networked Artifacts](https://networkedartifacts.com) ([Crowd Supply page](https://www.crowdsupply.com/networked-artifacts/air-lab)), [manual](https://networkedartifacts.com/manuals/airlab/device-overview)
+- Sensors: SCD41 (CO2, temp, humidity), SGP41 (VOC, NOx), LPS22 (pressure)
+- SGP41 needs **1 hour warm-up** before VOC/NOx are reliable. The VOC/NOx Index algorithms need **24 hours** of continuous operation to learn a baseline — readings before that are relative to limited history.
+- ESP32S3 microcontroller, 1500 mAh LiPo, E-Paper 296x128, open firmware
 - Configured via [Air Lab Studio](https://airlab.networkedartifacts.com) (Bluetooth, Chrome-based browser — Chrome/Edge/Brave only, not Firefox/Safari)
 - Setup flow: plug in USB-C → press A → set time → outdoor calibration → WiFi config → MQTT config
 - **WiFi: 2.4GHz only** — will not connect to 5GHz networks. Common gotcha if router broadcasts both bands under one SSID.
@@ -64,6 +66,8 @@ Table `airlab_readings` in SQLite:
 - Supports Home Assistant auto-discovery (homeassistant/sensor/…/config topics)
 
 ## Gotchas discovered during setup
+- **Must be plugged into USB-C for MQTT**: On battery, the AirLab sleeps and stops WiFi/MQTT publishing — no matter what. Only BLE connections keep it awake on battery. Confirmed by the AirLab team (Joel). For continuous monitoring, keep it plugged in.
 - **2.4GHz WiFi only**: AirLab silently fails to connect on 5GHz. No error — just stays "Disconnected".
 - **Mosquitto 2.0+ auth**: Default config rejects all connections. Must create password file and auth.conf before AirLab can connect.
 - **Credentials must match in 3 places**: Mosquitto password file, `.env`, and Air Lab Studio MQTT settings.
+- **Default sample rates**: Sleep 30s, Record 5s, Long-term 60s. When plugged in, it publishes every 5s (record rate). Cron runs every 1 minute so we get one reading per minute.
