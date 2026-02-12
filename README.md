@@ -21,11 +21,32 @@ sudo apt-get install -y mosquitto mosquitto-clients
 sudo systemctl enable mosquitto
 ```
 
-Mosquitto is now running on port 1883. Verify:
+Mosquitto is now running on port 1883.
+
+### Set up Mosquitto authentication
+
+Mosquitto 2.0+ rejects connections without auth by default. If you set a username/password in Air Lab Studio, you need to create matching credentials in Mosquitto:
 
 ```sh
-mosquitto_sub -h localhost -t "test" &
-mosquitto_pub -h localhost -t "test" -m "hello"
+# Create password file (enter your password when prompted)
+sudo mosquitto_passwd -c /etc/mosquitto/passwd myuser
+
+# Configure Mosquitto to use it
+echo 'listener 1883
+password_file /etc/mosquitto/passwd
+allow_anonymous false' | sudo tee /etc/mosquitto/conf.d/auth.conf
+
+# Restart
+sudo systemctl restart mosquitto
+```
+
+Use the same username/password in your `.env` and in Air Lab Studio.
+
+Verify it's working:
+
+```sh
+mosquitto_sub -h localhost -u myuser -P mypassword -t "test" &
+mosquitto_pub -h localhost -u myuser -P mypassword -t "test" -m "hello"
 # Should print "hello", then: kill %1
 ```
 
@@ -63,7 +84,7 @@ DB_PATH=/var/lib/airlab-dash/airlab.db
 
 - `MQTT_HOST` — `localhost` since Mosquitto runs on the Pi
 - `MQTT_PORT` — `1883` (default)
-- `MQTT_USERNAME` / `MQTT_PASSWORD` — leave empty unless you set up Mosquitto auth
+- `MQTT_USERNAME` / `MQTT_PASSWORD` — must match what you set in Mosquitto and Air Lab Studio (see step 1)
 - `MQTT_BASE_TOPIC` — must match what you set in Air Lab Studio
 - `DB_PATH` — where to store the SQLite database
 
@@ -75,8 +96,8 @@ Open [Air Lab Studio](https://airlab.networkedartifacts.com) in a Chrome-based b
 |-------|-------|
 | **Host** | Your Pi's local IP (e.g. `192.168.1.50`) |
 | **Port** | `1883` |
-| **Username** | (leave empty) |
-| **Password** | (leave empty) |
+| **Username** | Same as Mosquitto auth (step 1) |
+| **Password** | Same as Mosquitto auth (step 1) |
 | **Base Topic** | `airlab` (must match `.env`) |
 
 The AirLab status should change to "Networked".
@@ -222,14 +243,10 @@ chmod 750 /var/lib/airlab-dash
 chmod 640 /var/lib/airlab-dash/airlab.db
 ```
 
-### Mosquitto authentication (optional)
+### AirLab says "MQTT Disconnected"
 
-```sh
-sudo mosquitto_passwd -c /etc/mosquitto/passwd airlab
-echo 'listener 1883
-password_file /etc/mosquitto/passwd
-allow_anonymous false' | sudo tee /etc/mosquitto/conf.d/auth.conf
-sudo systemctl restart mosquitto
-```
-
-Then update `.env` with the username/password, and set the same in Air Lab Studio.
+Mosquitto 2.0+ rejects unauthenticated connections by default. If you set a username/password in Air Lab Studio, you must create matching credentials in Mosquitto (see step 1). Make sure:
+- The Mosquitto password file exists: `ls /etc/mosquitto/passwd`
+- The auth config exists: `cat /etc/mosquitto/conf.d/auth.conf`
+- The username/password in `.env` and Air Lab Studio match what you set in `mosquitto_passwd`
+- Restart after changes: `sudo systemctl restart mosquitto`

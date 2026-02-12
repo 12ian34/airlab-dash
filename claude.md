@@ -43,7 +43,7 @@ Table `airlab_readings` in SQLite:
 - **Crontab**: Script runs in `--single` mode per invocation. Connects to MQTT, waits up to 30s for a reading, saves, exits. No daemon.
 - **`.env` resolved relative to script**: `load_dotenv()` uses the script's own directory, so cron jobs work regardless of cwd.
 - **MQTT single-shot**: Connects, subscribes to `{base_topic}/#`, collects messages for 3s after first arrival (handles both JSON-blob and one-value-per-topic formats), saves, disconnects.
-- **Mosquitto on the Pi**: Lightweight broker, AirLab connects to it over local WiFi.
+- **Mosquitto on the Pi**: Lightweight broker, AirLab connects to it over local WiFi. Mosquitto 2.0+ requires auth by default — must create a password file via `mosquitto_passwd` and configure `/etc/mosquitto/conf.d/auth.conf`. The username/password must match across Mosquitto, `.env`, and Air Lab Studio.
 - **Same Grafana pattern as aranet4-dash**: SQLite plugin reads the `.db` file directly. Timestamps stored as DATETIME DEFAULT CURRENT_TIMESTAMP, converted via `CAST(strftime('%s', timestamp) AS INTEGER)` for time series, `* 1000` for table/stat panels.
 
 ## Config (.env)
