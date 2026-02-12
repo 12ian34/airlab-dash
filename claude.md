@@ -55,7 +55,15 @@ Table `airlab_readings` in SQLite:
 - `DB_PATH` — path to SQLite database (default `/var/lib/airlab-dash/airlab.db`)
 
 ## AirLab device details
+- Built by [Networked Artifacts](https://networkedartifacts.com) ([Crowd Supply page](https://www.crowdsupply.com/networked-artifacts/air-lab))
 - Sensors: SCD41 (CO2, temp, humidity), SGP41 (VOC, NOx), BMP (pressure)
-- Configured via [Air Lab Studio](https://airlab.networkedartifacts.com) (Bluetooth, Chrome-based browser)
+- Configured via [Air Lab Studio](https://airlab.networkedartifacts.com) (Bluetooth, Chrome-based browser — Chrome/Edge/Brave only, not Firefox/Safari)
+- Setup flow: plug in USB-C → press A → set time → outdoor calibration → WiFi config → MQTT config
+- **WiFi: 2.4GHz only** — will not connect to 5GHz networks. Common gotcha if router broadcasts both bands under one SSID.
 - MQTT topic structure TBD — use `discover.py` to inspect
 - Supports Home Assistant auto-discovery (homeassistant/sensor/…/config topics)
+
+## Gotchas discovered during setup
+- **2.4GHz WiFi only**: AirLab silently fails to connect on 5GHz. No error — just stays "Disconnected".
+- **Mosquitto 2.0+ auth**: Default config rejects all connections. Must create password file and auth.conf before AirLab can connect.
+- **Credentials must match in 3 places**: Mosquitto password file, `.env`, and Air Lab Studio MQTT settings.

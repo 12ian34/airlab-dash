@@ -2,6 +2,8 @@
 
 Read CO2, temperature, humidity, pressure, VOC, and NOx from a [Networked Artifacts AirLab](https://networkedartifacts.com/airlab) via MQTT and log to a local SQLite database. Visualise with Grafana.
 
+The [AirLab](https://www.crowdsupply.com/networked-artifacts/air-lab) is a portable, open-source air quality monitor built by [Networked Artifacts](https://networkedartifacts.com) (shoutout to Joel and the team). It measures CO2, temperature, humidity, atmospheric pressure, VOCs, and NOx using Sensirion sensors (SCD41 + SGP41), and publishes data over WiFi via MQTT. Check out their [Crowd Supply page](https://www.crowdsupply.com/networked-artifacts/air-lab) to get one.
+
 Designed to run on a Raspberry Pi via crontab, alongside [aranet4-dash](https://github.com/12ian34/aranet4-dash). Same pattern: `uv`, `.env`, cron `--single` mode, SQLite, Grafana.
 
 ## Prerequisites
@@ -11,7 +13,7 @@ Designed to run on a Raspberry Pi via crontab, alongside [aranet4-dash](https://
 - Python 3.9+ (pre-installed on Bookworm)
 - [uv](https://docs.astral.sh/uv/) (`curl -LsSf https://astral.sh/uv/install.sh | sh`)
 - [Grafana](https://grafana.com/docs/grafana/latest/setup-grafana/installation/debian/) + [SQLite datasource plugin](https://github.com/fr-ser/grafana-sqlite-datasource)
-- An AirLab on the same WiFi network as the Pi
+- An AirLab on the same WiFi network as the Pi (**must be 2.4GHz** — the AirLab does not support 5GHz WiFi)
 
 ## 1. Install Mosquitto
 
@@ -90,17 +92,38 @@ DB_PATH=/var/lib/airlab-dash/airlab.db
 
 ## 5. Configure your AirLab
 
-Open [Air Lab Studio](https://airlab.networkedartifacts.com) in a Chrome-based browser, connect via Bluetooth, go to Settings → MQTT:
+The AirLab is configured over Bluetooth using a web app. You need a Chrome-based browser (Chrome, Edge, Brave — not Firefox/Safari) on a computer with Bluetooth.
+
+### Initial device setup
+
+1. Plug the AirLab into USB-C power and press button **A** when prompted on the e-paper display
+2. It will ask for the time, then ask you to place it outside briefly for sensor calibration
+3. Bring it back inside — it's now logging locally
+
+### WiFi setup
+
+1. Go to [Air Lab Studio](https://airlab.networkedartifacts.com)
+2. Click **Connect** and select your AirLab from the Bluetooth dropdown
+3. In the sidebar, navigate to **Settings**
+4. Under **Wi-Fi**, enter your network SSID and password, then click **Configure**
+
+> **Important:** The AirLab only supports **2.4GHz WiFi**. If your router broadcasts both 2.4GHz and 5GHz under the same SSID, you may need to temporarily separate them or connect to the 2.4GHz-specific SSID.
+
+### MQTT setup
+
+Still in Air Lab Studio Settings, under **MQTT**:
 
 | Field | Value |
 |-------|-------|
-| **Host** | Your Pi's local IP (e.g. `192.168.1.50`) |
+| **Host** | Your Pi's local IP (e.g. `192.168.1.50` — find it with `hostname -I` on the Pi) |
 | **Port** | `1883` |
 | **Username** | Same as Mosquitto auth (step 1) |
 | **Password** | Same as Mosquitto auth (step 1) |
 | **Base Topic** | `airlab` (must match `.env`) |
 
-The AirLab status should change to "Networked".
+Click **Configure**. The connection status in the sidebar should change to **Networked**. If it stays at:
+- **Disconnected** — check WiFi settings (is it 2.4GHz?)
+- **Connected** — WiFi works but MQTT failed (check broker IP, port, and credentials)
 
 ## 6. Discover topics
 
@@ -212,6 +235,13 @@ CREATE INDEX IF NOT EXISTS idx_airlab_timestamp ON airlab_readings(timestamp);
 ```
 
 ## Troubleshooting
+
+### AirLab won't connect to WiFi
+
+The AirLab only supports **2.4GHz WiFi**. It will not see or connect to 5GHz networks. If your router uses the same SSID for both bands, try:
+- Connecting to the 2.4GHz-specific SSID (often has `-2G` or `2.4` in the name)
+- Temporarily disabling 5GHz in your router settings
+- Checking your router's client list to confirm the AirLab connected on 2.4GHz
 
 ### AirLab shows "Connected" but not "Networked"
 
