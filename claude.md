@@ -22,6 +22,8 @@ airlab-dash/
 ├── pyproject.toml             # Python dependencies (uv)
 ├── grafana/
 │   └── dashboard.json         # Grafana dashboard (import via UI)
+├── .claude/
+│   └── skills/airlab-dash/    # Repo-local Claude skill for AirLab recovery
 ├── README.md                  # Full setup instructions
 └── claude.md                  # This file (AI context)
 ```
@@ -158,4 +160,18 @@ Fresh live checks on `pian` confirmed the same failure mode:
 - `uv run discover.py --topic "#"` connected to Mosquitto for 20s and saw **zero MQTT messages**.
 - Synthetic MQTT publish to the expected `{MQTT_BASE_TOPIC}/co2`, `tmp`, `hum`, `prs`, `voc`, `nox` topics was received by `airlab_collector.py` and saved to a temporary DB. This proves broker auth, topic parsing, insertion, and the collector path still work.
 
-Conclusion: the remaining fault is upstream of this repo. The AirLab device is not publishing to the Pi broker after the reboot, or it is publishing to a different host/network. First physical fix to try: keep AirLab on USB-C, power-cycle/reconnect it, then use Air Lab Studio to verify MQTT host is the current Pi LAN IP (`192.168.1.155`) or a hostname the device can resolve, port `1883`, matching credentials, and base topic `airlab`.
+Conclusion at that point: the remaining fault was upstream of this repo. The AirLab device was not publishing to the Pi broker after the reboot, or was publishing to a different host/network. First physical fix to try: keep AirLab on USB-C, power-cycle/reconnect it, then use Air Lab Studio to verify MQTT host is the current Pi LAN IP (`192.168.1.155`) or a hostname the device can resolve, port `1883`, matching credentials, and base topic `airlab`.
+
+Recovery observed shortly after:
+
+- Air Lab Studio MQTT settings matched the Pi: host `192.168.1.155`, port `1883`, username set, base topic `airlab`.
+- `Prevent Sleep` was visible as **off** in Studio; enable it and press **Configure** when recovering this failure mode.
+- Live MQTT discovery then showed messages every ~5s on `airlab/co2`, `airlab/tmp`, `airlab/hum`, `airlab/voc`, `airlab/nox`, `airlab/prs`, plus `airlab/usb=ON` and `airlab/chg=ON`.
+- Manual collector recovery command:
+
+```bash
+cd ~/dev/airlab-dash
+uv run airlab_collector.py --single
+```
+
+- The manual run at **2026-04-17 19:42 BST** saved fresh readings again (`co2_ppm=532`, `temperature_c=23.5`, `humidity_percent=37.5`, `pressure_hpa=1016`, `voc_index=32`, `nox_index=2`). Cron should continue normal minute-by-minute ingestion after that.
