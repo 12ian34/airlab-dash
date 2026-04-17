@@ -263,11 +263,11 @@ def read_airlab(cfg: dict, timeout: int = 30) -> dict[str, float] | None:
     return reading
 
 
-def single_reading(cfg: dict) -> None:
+def single_reading(cfg: dict, timeout: int = 30) -> None:
     """Take a single reading and exit (for cron)."""
     conn = init_db(cfg["db_path"])
     try:
-        reading = read_airlab(cfg)
+        reading = read_airlab(cfg, timeout=timeout)
         if reading is None:
             logger.error("Failed to read from AirLab")
             sys.exit(1)
@@ -310,10 +310,10 @@ def main() -> None:
     args = parser.parse_args()
 
     if args.single:
-        single_reading(cfg)
+        single_reading(cfg, timeout=args.timeout)
     else:
         # Default: also single mode (no daemon)
-        single_reading(cfg)
+        single_reading(cfg, timeout=args.timeout)
 
 
 if __name__ == "__main__":
